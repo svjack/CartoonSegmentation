@@ -113,6 +113,21 @@ git clone https://huggingface.co/spaces/svjack/AnimeIns_CPU && cd AnimeIns_CPU
 python app.py
 ```
 
+- Use script to run Segmentation Demo
+```bash
+python seg_script.py Genshin_Impact_Images Genshin_Impact_Images_Seg
+
+cd ..
+featurize dataset download bad53b75-692d-422a-8262-f3f07e3aab81
+featurize dataset download b0190045-da94-40ac-b267-2e2efd68b2cb
+unzip 原神单人图片2.zip
+unzip 原神单人图片1.zip
+cd  AnimeIns_CPU
+
+python seg_script.py ../single_output_images_v2 Genshin_Impact_Images_Seg_v2
+python seg_script.py ../single_output_images Genshin_Impact_Images_Seg_v1
+```
+
 ### Download models
 
 ```bash
