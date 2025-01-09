@@ -74,6 +74,35 @@ git clone https://huggingface.co/dreMaz/AnimeInstanceSegmentation models/AnimeIn
 python run_kenburns.py --cfg configs/3dkenburns.yaml --input-img examples/kenburns_lion.png
 ```
 
+- Run 3d Kenburns On Genshin Impact Image Demo
+```bash
+python run_kenburns_batch.py --cfg configs/3dkenburns.yaml --input-img Genshin_Impact_Images --save_dir Genshin_Impact_Images_3dkenburns
+```
+
+
+https://github.com/user-attachments/assets/8b511789-81cb-49b2-a0ad-62f1ffb35a3b
+
+
+
+
+https://github.com/user-attachments/assets/82bed331-bbd9-4513-a89a-50aa4ab9b645
+
+
+
+
+https://github.com/user-attachments/assets/c9b7c663-406d-4cd5-9531-44849f668da6
+
+
+
+https://github.com/user-attachments/assets/17d746b4-541f-46d8-9e44-6880e24b1d4b
+
+
+
+
+
+https://github.com/user-attachments/assets/02b9c9b8-391d-40c3-863c-5b475716f0bd
+
+
 ### Download models
 
 ```bash
