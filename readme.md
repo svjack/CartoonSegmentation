@@ -36,7 +36,11 @@ python -m ipykernel install --user --name animeins --display-name "animeins"
 pip install -r requirements.txt
 
 pip uninstall mmcv -y
-pip install mmcv
+
+### https://mmcv.readthedocs.io/en/latest/get_started/installation.html
+pip install mmcv==2.2.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.4/index.html
+
+#pip install mmcv
 #pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1/index.html
 ```
 
