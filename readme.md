@@ -25,10 +25,17 @@ Implementations of the paper _Instance-guided Cartoon Editing with a Large-scale
 ### Install Dependencies
 
 ```bash
+sudo apt-get update && sudo apt-get install git-lfs ffmpeg cbm
+
+git clone https://github.com/svjack/CartoonSegmentation && cd CartoonSegmentation
 conda env create -f animeins.yaml
 conda activate animeins
+pip install ipykernel
+python -m ipykernel install --user --name animeins --display-name "animeins"
+
 pip uninstall mmcv -y
-pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1/index.html
+pip install mmcv
+#pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1/index.html
 ```
 
 ### Download models
