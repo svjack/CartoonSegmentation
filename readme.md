@@ -28,10 +28,12 @@ Implementations of the paper _Instance-guided Cartoon Editing with a Large-scale
 sudo apt-get update && sudo apt-get install git-lfs ffmpeg cbm
 
 git clone https://github.com/svjack/CartoonSegmentation && cd CartoonSegmentation
-conda env create -f conda_env.yaml
+#conda env create -f conda_env.yaml
+conda env create --name animeins python=3.10
 conda activate animeins
 pip install ipykernel
 python -m ipykernel install --user --name animeins --display-name "animeins"
+pip install -r requirements.txt
 
 pip uninstall mmcv -y
 pip install mmcv
