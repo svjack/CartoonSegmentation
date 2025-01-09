@@ -40,6 +40,7 @@ pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2
 pip install mmdet
 pip install "numpy<2.0.0"
 pip install moviepy==1.0.3
+pip install "httpx[socks]"
 ```
 
 ```bash
