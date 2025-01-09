@@ -69,6 +69,10 @@ https://github.com/dmMaze/CartoonSegmentation/assets/51270320/503c87c3-39d7-40f8
 
 Install cupy following https://docs.cupy.dev/en/stable/install.html  
 
+```bash
+pip install cupy-cuda12x
+```
+
 Run
 ``` python
 python run_kenburns.py --cfg configs/3dkenburns.yaml --input-img examples/kenburns_lion.png
