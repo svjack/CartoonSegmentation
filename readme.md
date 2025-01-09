@@ -35,13 +35,43 @@ pip install ipykernel
 python -m ipykernel install --user --name animeins --display-name "animeins"
 pip install -r requirements.txt
 
-pip uninstall mmcv -y
+pip install torch==2.1.1 torchvision
+pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
+pip install mmdet
+pip install "numpy<2.0.0"
+pip install moviepy==1.0.3
+```
 
-### https://mmcv.readthedocs.io/en/latest/get_started/installation.html
-pip install mmcv==2.2.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.4/index.html
+```bash
+pip install cupy-cuda12x
+```
 
-#pip install mmcv
-#pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1/index.html
+```bash
+mkdir -p data/libs
+
+sudo apt install build-essential libopencv-dev -y
+git clone https://github.com/AnimeIns/PyPatchMatch && cd PyPatchMatch
+
+mkdir release && cd release
+sudo apt install cmake
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+
+cd ../..
+mv PyPatchMatch/release/libpatchmatch_inpaint.so ./data/libs
+rm -rf PyPatchMatch
+
+```
+
+```bash
+huggingface-cli lfs-enable-largefiles .
+mkdir models
+git clone https://huggingface.co/dreMaz/AnimeInstanceSegmentation models/AnimeInstanceSegmentatio
+```
+
+- Run 3d Kenburns Demo
+```bash
+python run_kenburns.py --cfg configs/3dkenburns.yaml --input-img examples/kenburns_lion.png
 ```
 
 ### Download models
@@ -50,8 +80,6 @@ pip install mmcv==2.2.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2
 huggingface-cli lfs-enable-largefiles .
 mkdir models
 git clone https://huggingface.co/dreMaz/AnimeInstanceSegmentation models/AnimeInstanceSegmentation
-
-
 ```
 
 ## Run Segmentation
