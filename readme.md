@@ -70,6 +70,8 @@ mkdir models
 git clone https://huggingface.co/dreMaz/AnimeInstanceSegmentation models/AnimeInstanceSegmentatio
 ```
 
+
+
 - Run 3d Kenburns Demo
 ```bash
 python run_kenburns.py --cfg configs/3dkenburns.yaml --input-img examples/kenburns_lion.png
@@ -103,6 +105,13 @@ https://github.com/user-attachments/assets/17d746b4-541f-46d8-9e44-6880e24b1d4b
 
 https://github.com/user-attachments/assets/02b9c9b8-391d-40c3-863c-5b475716f0bd
 
+
+### After above install of gpu version
+- Use Segmentation Demo on gpu
+```bash
+git clone https://huggingface.co/spaces/svjack/AnimeIns_CPU && cd AnimeIns_CPU
+python app.py
+```
 
 ### Download models
 
