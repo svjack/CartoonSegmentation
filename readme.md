@@ -105,6 +105,9 @@ https://github.com/user-attachments/assets/17d746b4-541f-46d8-9e44-6880e24b1d4b
 
 https://github.com/user-attachments/assets/02b9c9b8-391d-40c3-863c-5b475716f0bd
 
+```bash
+python run_kenburns_batch.py --cfg configs/3dkenburns_no_depth_field.yaml --input-img Genshin_Impact_Images --save_dir Genshin_Impact_Images_3dkenburns_no_depth_field
+```
 
 ### After above install of gpu version
 - Use Segmentation Demo on gpu
