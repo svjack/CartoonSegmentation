@@ -314,7 +314,7 @@ for sTitle, group in tqdm(grouped):
             print(f"File does not exist: {mp4_filepath}")
 ```
 
-## 9. Use the Hugging Face Hub Demo
+## 9. Use the Hugging Face Hub Demo Local Directly
 
 Clone and run the demo from Hugging Face Hub:
 
@@ -322,6 +322,10 @@ Clone and run the demo from Hugging Face Hub:
 git clone https://huggingface.co/spaces/svjack/Genshin-Impact-3d-Kenburns-Manga && cd Genshin-Impact-3d-Kenburns-Manga && pip install -r requirements.txt 
 python app.py
 ```
+
+
+Uploading Untitled video - Made with Clipchamp (3).mp4…
+
 
 
 ## Run Segmentation
