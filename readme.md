@@ -153,6 +153,177 @@ mkdir models
 git clone https://huggingface.co/dreMaz/AnimeInstanceSegmentation models/AnimeInstanceSegmentation
 ```
 
+# Genshin Impact 3d Kenburns Manga Demo use CartoonSegmentation
+
+# Genshin Impact Manga Processing Workflow
+
+## 1. Install Dependencies
+
+First, install the required Python libraries:
+
+```bash
+!pip install datasets
+```
+
+## 2. Load the Dataset
+
+Load the Genshin Impact Manga dataset:
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("svjack/Genshin-Impact-Manga")["train"]
+```
+
+## 3. Save Manga Images
+
+Save the images from the dataset to a local directory `manga_save`:
+
+```python
+from tqdm import tqdm
+import os
+
+os.makedirs("manga_save", exist_ok=True)
+l = len(ds)
+
+for i in tqdm(range(l)):
+    d = ds[i]
+    sTitle = d["sTitle"]
+    name = d["name"]
+    img = d["image"]
+    save_path = os.path.join("manga_save", sTitle.replace(" ", "_") + "_" + name).replace(".jpg", ".png")
+    img.resize((800, 1131)).save(save_path)
+```
+
+## 4. Analyze Image Sizes
+
+Analyze the sizes of the saved images:
+
+```python
+import pathlib
+import pandas as pd
+from PIL import Image
+
+df = pd.DataFrame(
+    pd.Series(pathlib.Path("manga_save").rglob("*.png")).map(
+        lambda x: (x, Image.open(x).size)
+    ).values.tolist()
+)
+df.columns = ["path", "im_size"]
+df["im_size"].value_counts()
+```
+
+## 5. Upscale Images
+
+Use [APISR](https://github.com/svjack/APISR) to upscale the images:
+
+```bash
+rm -rf ../CartoonSegmentation/manga_save/.ipynb_checkpoints
+python test_code/inference.py --input_dir ../CartoonSegmentation/manga_save  --weight_path pretrained/4x_APISR_GRL_GAN_generator.pth  --store_dir manga_save_4x
+```
+
+## 6. Add Transparent Borders
+
+Add transparent borders to the upscaled images:
+
+```python
+from PIL import Image
+import os
+from tqdm import tqdm
+
+def add_inner_transparent_border(input_path, output_path, border_width, output_width, output_height):
+    for filename in tqdm(os.listdir(input_path)):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+            img_path = os.path.join(input_path, filename)
+            img = Image.open(img_path).convert("RGBA")
+
+            original_width, original_height = img.size
+            new_width = original_width - 2 * border_width
+            new_height = original_height - 2 * border_width
+
+            if new_width <= 0 or new_height <= 0:
+                raise ValueError("Border width is too large to shrink the image.")
+
+            inner_img = img.resize((new_width, new_height))
+            new_img = Image.new("RGBA", (original_width, original_height), (0, 0, 0, 0))
+
+            paste_x = (original_width - new_width) // 2
+            paste_y = (original_height - new_height) // 2
+
+            new_img.paste(inner_img, (paste_x, paste_y), inner_img)
+            final_img = new_img.resize((output_width, output_height))
+
+            output_img_path = os.path.join(output_path, filename)
+            os.makedirs(output_path, exist_ok=True)
+            final_img.save(output_img_path)
+
+input_path = "manga_save_4x"
+output_path = "manga_save_4x_pad_512"
+
+border_width = 512  # Set border width
+output_width = 2816  # Set output image width
+output_height = 4096  # Set output image height
+
+add_inner_transparent_border(input_path, output_path, border_width, output_width, output_height)
+```
+
+## 7. Add 3d Kenburns Effects
+
+Use the `run_kenburns_batch.py` script to add 3d Kenburns effects:
+
+```bash
+python run_kenburns_batch.py --cfg configs/3dkenburns_no_depth_field_max_reso.yaml --input-img manga_save_4x_pad_512 --save_dir manga_save_4x_3dkenburns_no_depth_field_512
+```
+
+## 8. Reorganize Resulting Videos
+
+Reorganize the generated videos by chapter:
+
+```python
+import os
+import re
+import pandas as pd
+from datasets import load_dataset
+from tqdm import tqdm
+import shutil
+
+ds = load_dataset("svjack/Genshin-Impact-Manga")["train"]
+df = ds.to_pandas()
+
+input_path = "manga_save_4x_3dkenburns_no_depth_field_512_mix"
+output_path = "reorganized_manga"
+
+os.makedirs(output_path, exist_ok=True)
+
+grouped = df.groupby("sTitle")
+
+for sTitle, group in tqdm(grouped):
+    subdir = os.path.join(output_path, sTitle.replace(" ", "_"))
+    os.makedirs(subdir, exist_ok=True)
+
+    for idx, row in group.iterrows():
+        name = row["name"]
+        mp4_filename = f"{sTitle}_{name}_4x.mp4".replace(" ", "_").replace(".jpg", "").replace(".png", "")
+        mp4_filepath = os.path.join(input_path, mp4_filename)
+
+        if os.path.exists(mp4_filepath):
+            new_filename = name.replace(".jpg", ".mp4").replace(".png", ".mp4")
+            new_filepath = os.path.join(subdir, new_filename)
+            shutil.copy2(mp4_filepath, new_filepath)
+        else:
+            print(f"File does not exist: {mp4_filepath}")
+```
+
+## 9. Use the Hugging Face Hub Demo
+
+Clone and run the demo from Hugging Face Hub:
+
+```bash
+git clone https://huggingface.co/spaces/svjack/Genshin-Impact-3d-Kenburns-Manga && cd Genshin-Impact-3d-Kenburns-Manga && pip install -r requirements.txt 
+python app.py
+```
+
+
 ## Run Segmentation
 
 See `run_segmentation.ipynb``. 
