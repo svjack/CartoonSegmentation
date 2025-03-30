@@ -1,5 +1,6 @@
 #### use this to get depth image
 #### https://huggingface.co/spaces/depth-anything/Depth-Anything-V2
+#### https://huggingface.co/spaces/svjack/Depth-Anything-V2
 
 ```python
 #### 规则可能就能够生成
