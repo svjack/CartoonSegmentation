@@ -195,3 +195,216 @@ generate_transition_video(
 #### https://huggingface.co/spaces/svjack/AnimeIns_Depth_Sketch_Video_CPU
 #### sketch_video_app.py
 
+```python
+#### https://huggingface.co/spaces/svjack/Depth-Anything-V2
+#### app.py
+
+import os
+from gradio_client import Client, handle_file
+from shutil import copy2
+from tqdm import tqdm
+
+# Initialize client
+client = Client("http://localhost:7861/")
+
+# Define paths
+source_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Images"
+output_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Depth_Images"
+
+# Create output folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
+
+# Iterate through all files in source folder
+for filename in tqdm(os.listdir(source_folder)):
+    # Skip non-image files (optional)
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+        continue
+
+    # Process the image
+    file_path = os.path.join(source_folder, filename)
+    try:
+        result = client.predict(
+            image=handle_file(file_path),
+            api_name="/on_submit"
+        )
+
+        # Copy the depth image to output folder with same filename
+        depth_image_path = result[1]
+        output_path = os.path.join(output_folder, filename)
+        copy2(depth_image_path, output_path)
+
+        print(f"Processed {filename} successfully")
+
+    except Exception as e:
+        print(f"Error processing {filename}: {str(e)}")
+
+print("All images processed!")
+
+#### https://huggingface.co/spaces/svjack/AnimeIns_Depth_Sketch_Video_CPU
+#### sketch_video_app.py
+
+import os
+from gradio_client import Client, handle_file
+from shutil import copy2
+from tqdm import tqdm
+
+# Initialize client
+client = Client("http://localhost:7860")
+
+# Define paths
+sketch_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Images"
+depth_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Depth_Images"
+output_folder = "Genshin_StarRail_Longshu_Sketch_Guide_to_Color_Videos_character_first"
+
+# Create output folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
+
+# Get list of files in both folders (only process files that exist in both)
+sketch_files = set(os.listdir(sketch_folder))
+depth_files = set(os.listdir(depth_folder))
+common_files = sketch_files.intersection(depth_files)
+
+# Process each matching file pair
+for filename in tqdm(common_files):
+    # Skip non-image files (optional)
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+        continue
+
+    try:
+        # Prepare file paths
+        sketch_path = os.path.join(sketch_folder, filename)
+        depth_path = os.path.join(depth_folder, filename)
+
+        # Process the image pair
+        result = client.predict(
+            original_image=handle_file(sketch_path),
+            depth_map=handle_file(depth_path),
+            render_order="character_first",
+            duration=3,
+            api_name="/process_images"
+        )
+
+        # Generate output video path (replace image extension with .mp4)
+        video_name = os.path.splitext(filename)[0] + ".mp4"
+        output_path = os.path.join(output_folder, video_name)
+
+        # Copy the generated video to output folder
+        copy2(result["video"], output_path)
+
+        print(f"Processed {filename} successfully. Video saved as {video_name}")
+
+    except Exception as e:
+        print(f"Error processing {filename}: {str(e)}")
+
+print(f"Processing complete! Videos saved in {output_folder}")
+
+import os
+from gradio_client import Client, handle_file
+from shutil import copy2
+from tqdm import tqdm
+
+# Initialize client
+client = Client("http://localhost:7860")
+
+# Define paths
+sketch_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Images"
+depth_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Depth_Images"
+output_folder = "Genshin_StarRail_Longshu_Sketch_Guide_to_Color_Videos_far_to_near"
+
+# Create output folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
+
+# Get list of files in both folders (only process files that exist in both)
+sketch_files = set(os.listdir(sketch_folder))
+depth_files = set(os.listdir(depth_folder))
+common_files = sketch_files.intersection(depth_files)
+
+# Process each matching file pair
+for filename in tqdm(common_files):
+    # Skip non-image files (optional)
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+        continue
+
+    try:
+        # Prepare file paths
+        sketch_path = os.path.join(sketch_folder, filename)
+        depth_path = os.path.join(depth_folder, filename)
+
+        # Process the image pair
+        result = client.predict(
+            original_image=handle_file(sketch_path),
+            depth_map=handle_file(depth_path),
+            render_order="far_to_near",
+            duration=3,
+            api_name="/process_images"
+        )
+
+        # Generate output video path (replace image extension with .mp4)
+        video_name = os.path.splitext(filename)[0] + ".mp4"
+        output_path = os.path.join(output_folder, video_name)
+
+        # Copy the generated video to output folder
+        copy2(result["video"], output_path)
+
+        print(f"Processed {filename} successfully. Video saved as {video_name}")
+
+    except Exception as e:
+        print(f"Error processing {filename}: {str(e)}")
+
+print(f"Processing complete! Videos saved in {output_folder}")
+
+import os
+from gradio_client import Client, handle_file
+from shutil import copy2
+from tqdm import tqdm
+
+# Initialize client
+client = Client("http://localhost:7860")
+
+# Define paths
+sketch_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Images"
+depth_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Depth_Images"
+output_folder = "Genshin_StarRail_Longshu_Sketch_Guide_to_Color_Videos_near_to_far"
+
+# Create output folder if it doesn't exist
+os.makedirs(output_folder, exist_ok=True)
+
+# Get list of files in both folders (only process files that exist in both)
+sketch_files = set(os.listdir(sketch_folder))
+depth_files = set(os.listdir(depth_folder))
+common_files = sketch_files.intersection(depth_files)
+
+# Process each matching file pair
+for filename in tqdm(common_files):
+    # Skip non-image files (optional)
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+        continue
+
+    try:
+        # Prepare file paths
+        sketch_path = os.path.join(sketch_folder, filename)
+        depth_path = os.path.join(depth_folder, filename)
+
+        # Process the image pair
+        result = client.predict(
+            original_image=handle_file(sketch_path),
+            depth_map=handle_file(depth_path),
+            render_order="near_to_far",
+            duration=3,
+            api_name="/process_images"
+        )
+
+        # Generate output video path (replace image extension with .mp4)
+        video_name = os.path.splitext(filename)[0] + ".mp4"
+        output_path = os.path.join(output_folder, video_name)
+
+        # Copy the generated video to output folder
+        copy2(result["video"], output_path)
+
+        print(f"Processed {filename} successfully. Video saved as {video_name}")
+
+    except Exception as e:
+        print(f"Error processing {filename}: {str(e)}")
+
+print(f"Processing complete! Videos saved in {output_folder}")
+```
