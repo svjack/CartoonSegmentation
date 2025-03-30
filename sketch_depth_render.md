@@ -217,7 +217,7 @@ os.makedirs(output_folder, exist_ok=True)
 # Iterate through all files in source folder
 for filename in tqdm(os.listdir(source_folder)):
     # Skip non-image files (optional)
-    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif', ".webp")):
         continue
 
     # Process the image
@@ -267,7 +267,7 @@ common_files = sketch_files.intersection(depth_files)
 # Process each matching file pair
 for filename in tqdm(common_files):
     # Skip non-image files (optional)
-    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif', ".webp" )):
         continue
 
     try:
@@ -322,7 +322,7 @@ common_files = sketch_files.intersection(depth_files)
 # Process each matching file pair
 for filename in tqdm(common_files):
     # Skip non-image files (optional)
-    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif' , ".webp" )):
         continue
 
     try:
@@ -377,7 +377,7 @@ common_files = sketch_files.intersection(depth_files)
 # Process each matching file pair
 for filename in tqdm(common_files):
     # Skip non-image files (optional)
-    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif' , ".webp" )):
         continue
 
     try:
