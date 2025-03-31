@@ -486,3 +486,126 @@ for filename in tqdm(common_files):
 print(f"Processing complete! Videos saved in {output_base_folder}")
 
 ```
+
+#### 结合 image to svg:
+#### https://huggingface.co/spaces/svjack/image-to-vector
+#### 使用svg 逐步生成视频（要求必须整装）
+#### pip install opencv-python "httpx[socks]" CairoSVG
+```python
+import pandas as pd
+from io import BytesIO
+from PIL import Image
+import cairosvg
+import os
+import cv2
+import numpy as np
+
+def clean_svg(svg_string):
+    """Optional function to clean SVG if needed"""
+    # Add your SVG cleaning logic here if needed
+    return svg_string
+
+def rasterize_svg(svg_string, resolution=1024, dpi=128, scale=2):
+    """Convert SVG string to PNG image"""
+    try:
+        svg_raster_bytes = cairosvg.svg2png(
+            bytestring=svg_string,
+            background_color='white',
+            output_width=resolution,
+            output_height=resolution,
+            dpi=dpi,
+            scale=scale)
+        svg_raster = Image.open(BytesIO(svg_raster_bytes))
+    except:
+        try:
+            svg = clean_svg(svg_string)
+            svg_raster_bytes = cairosvg.svg2png(
+                bytestring=svg,
+                background_color='white',
+                output_width=resolution,
+                output_height=resolution,
+                dpi=dpi,
+                scale=scale)
+            svg_raster = Image.open(BytesIO(svg_raster_bytes))
+        except:
+            svg_raster = Image.new('RGB', (resolution, resolution), color='white')
+    return svg_raster
+
+def process_svg_to_video(input_svg_path, output_video_path, video_duration_seconds=10, resolution=224, chunk_size=100):
+    """Process SVG file and create a video with specified duration"""
+    # Read SVG file
+    df = pd.read_table(input_svg_path, header=None)
+    df_head = df.head(3)
+    df_tail = df.tail(1)
+    df_middle = df.iloc[3:-1, :]
+
+    # Calculate number of chunks
+    total_rows = len(df_middle)
+    num_chunks = (total_rows // chunk_size) + (1 if total_rows % chunk_size else 0)
+
+    # Create a temporary directory for images
+    temp_dir = "temp_video_frames"
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Process each chunk and save as image
+    frame_files = []
+    for i in range(num_chunks):
+        start_idx = i * chunk_size
+        end_idx = start_idx + chunk_size
+
+        # Get current chunk
+        current_chunk = df_middle.iloc[0:end_idx, :]
+
+        # Combine with head and tail
+        combined_df = pd.concat([df_head, current_chunk, df_tail], axis=0)
+        svg_content = "\n".join(combined_df[0].values.tolist())
+
+        # Convert to image and save
+        img = rasterize_svg(svg_content, resolution=resolution)
+        img_filename = os.path.join(temp_dir, f"frame_{i:04d}.png")
+        img.save(img_filename)
+        frame_files.append(img_filename)
+
+    # Create video from frames
+    create_video_from_frames(frame_files, output_video_path, video_duration_seconds, resolution)
+
+    # Clean up temporary files
+    for file in frame_files:
+        os.remove(file)
+    os.rmdir(temp_dir)
+
+    print(f"Video saved to {output_video_path}")
+
+def create_video_from_frames(frame_files, output_path, duration_seconds, resolution):
+    """Create video from sequence of frames with specified duration"""
+    # Calculate frame rate based on desired duration
+    num_frames = len(frame_files)
+    fps = num_frames / duration_seconds
+
+    # Initialize video writer
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # or 'avc1' for H.264
+    video = cv2.VideoWriter(output_path, fourcc, fps, (resolution, resolution))
+
+    # Read each frame and write to video
+    for frame_file in frame_files:
+        # Read image with PIL and convert to OpenCV format
+        pil_img = Image.open(frame_file)
+        cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+        video.write(cv_img)
+
+    # Add last frame to fill remaining time if needed
+    if num_frames > 0:
+        remaining_frames = int(fps * duration_seconds) - num_frames
+        for _ in range(remaining_frames):
+            video.write(cv_img)
+
+    video.release()
+
+# Example usage
+input_svg = "svg_output.svg"  # Your input SVG file
+output_video = "output_video.mp4"  # Output video file
+video_duration = 10  # Desired video duration in seconds
+
+process_svg_to_video(input_svg, output_video, video_duration_seconds=video_duration, resolution = 1024)
+
+```
