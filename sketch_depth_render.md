@@ -194,6 +194,7 @@ generate_transition_video(
 #### have 
 #### https://huggingface.co/spaces/svjack/AnimeIns_Depth_Sketch_Video_CPU
 #### sketch_video_app.py
+#### sketch_video_app_from_blank.py
 
 ```python
 #### https://huggingface.co/spaces/svjack/Depth-Anything-V2
@@ -408,3 +409,5 @@ for filename in tqdm(common_files):
 
 print(f"Processing complete! Videos saved in {output_folder}")
 ```
+
+#### sketch_video_app_from_blank.py
