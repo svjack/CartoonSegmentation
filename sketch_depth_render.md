@@ -609,3 +609,6 @@ video_duration = 10  # Desired video duration in seconds
 process_svg_to_video(input_svg, output_video, video_duration_seconds=video_duration, resolution = 1024)
 
 ```
+
+#### 通过 图片 生成 对应 生成过程 的 gradio 应用 
+#### https://huggingface.co/spaces/svjack/image-to-vector-video
