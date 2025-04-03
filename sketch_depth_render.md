@@ -487,6 +487,87 @@ print(f"Processing complete! Videos saved in {output_base_folder}")
 
 ```
 
+#### sketch_video_app_from_blank_direction.py
+```python
+import os
+from gradio_client import Client, handle_file
+from shutil import copy2
+from tqdm import tqdm
+
+# Initialize client
+#client = Client("https://2b705df0809ccdc76b.gradio.live/")
+client = Client("http://localhost:7860/")
+
+# Define paths
+sketch_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Images"
+depth_folder = "Genshin_StarRail_Longshu_Sketch_Guide_Depth_Images"
+output_base_folder = "Genshin_StarRail_Longshu_Blank_Sketch_Color_Direction_Videos"
+
+sketch_folder = "ACG_Cover_Images"
+depth_folder = "ACG_Cover_Depth_Images"
+output_base_folder = "ACG_Cover_Blank_Sketch_Color_Direction_Videos"
+
+# Create base output folder if it doesn't exist
+os.makedirs(output_base_folder, exist_ok=True)
+
+# Get list of files in both folders (only process files that exist in both)
+sketch_files = set(os.listdir(sketch_folder))
+depth_files = set(os.listdir(depth_folder))
+common_files = sketch_files.intersection(depth_files)
+
+# Define all possible transition and direction combinations
+transitions = ["character_first", "near_to_far", "far_to_near"]
+directions = ["left_to_right", "right_to_left", "top_to_bottom", "bottom_to_top"]
+
+# Generate all combinations of transitions and directions
+combinations = [
+    (first_trans, second_trans, first_dir, second_dir)
+    for first_trans in transitions
+    for second_trans in transitions
+    for first_dir in directions
+    for second_dir in directions
+]
+
+# Process each matching file pair with all transition/direction combinations
+for filename in tqdm(common_files):
+    # Skip non-image files (optional)
+    if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif', ".webp")):
+        continue
+
+    # Prepare file paths
+    sketch_path = os.path.join(sketch_folder, filename)
+    depth_path = os.path.join(depth_folder, filename)
+
+    for first_transition, second_transition, first_direction, second_direction in combinations:
+        try:
+            # Process the image pair with current combination
+            result = client.predict(
+                original_image=handle_file(sketch_path),
+                depth_map=handle_file(depth_path),
+                first_transition=first_transition,
+                second_transition=second_transition,
+                first_direction=first_direction,
+                second_direction=second_direction,
+                duration=6,
+                api_name="/process_images"
+            )
+
+            # Generate output video path with transition/direction info in filename
+            base_name = os.path.splitext(filename)[0]
+            video_name = f"{base_name}_{first_transition}_{second_transition}_{first_direction}_{second_direction}.mp4"
+            output_path = os.path.join(output_base_folder, video_name)
+
+            # Copy the generated video to output folder
+            copy2(result["video"], output_path)
+
+            print(f"Processed {filename} with {first_transition}/{second_transition} and {first_direction}/{second_direction} successfully. Video saved as {video_name}")
+
+        except Exception as e:
+            print(f"Error processing {filename} with {first_transition}/{second_transition} and {first_direction}/{second_direction}: {str(e)}")
+
+print(f"Processing complete! Videos saved in {output_base_folder}")
+```
+
 #### 结合 image to svg:
 #### https://huggingface.co/spaces/svjack/image-to-vector
 #### 使用svg 逐步生成视频（要求必须整装）
