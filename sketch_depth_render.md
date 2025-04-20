@@ -1,3 +1,145 @@
+#### abstract video demo
+
+```python
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+import cv2
+import numpy as np
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+@dataclass
+class Frame:
+    number: int
+    path: Path
+    timestamp: float
+    score: float
+
+def create_abstract_video(
+    input_video_path: Path,
+    output_video_path: Path,
+    frames_per_minute: int = 60,
+    duration: Optional[float] = None,
+    max_frames: Optional[int] = None,
+    frame_difference_threshold: float = 1.0,
+    target_duration: float = 1.5
+) -> None:
+    """Create an abstract video with specified target duration."""
+    def _calculate_frame_difference(frame1: np.ndarray, frame2: np.ndarray) -> float:
+        if frame1 is None or frame2 is None:
+            return 0.0
+        gray1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
+        gray2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
+        diff = cv2.absdiff(gray1, gray2)
+        return float(np.mean(diff))
+
+    cap = cv2.VideoCapture(str(input_video_path))
+    if not cap.isOpened():
+        raise ValueError(f"Could not open video file: {input_video_path}")
+    
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    video_duration = total_frames / fps
+    
+    if duration:
+        video_duration = min(duration, video_duration)
+        total_frames = int(min(total_frames, duration * fps))
+    
+    target_frames = max(1, min(
+        int((video_duration / 60) * frames_per_minute),
+        total_frames,
+        max_frames if max_frames is not None else float('inf')
+    ))
+    
+    sample_interval = max(1, total_frames // (target_frames * 2))
+    frame_candidates = []
+    prev_frame = None
+    frame_count = 0
+    
+    while frame_count < total_frames:
+        ret, frame = cap.read()
+        if not ret:
+            break
+            
+        if frame_count % sample_interval == 0:
+            score = _calculate_frame_difference(frame, prev_frame)
+            if score > frame_difference_threshold:
+                timestamp = frame_count / fps
+                frame_candidates.append((frame_count, frame, score, timestamp))
+            prev_frame = frame.copy()
+            
+        frame_count += 1
+        
+    cap.release()
+    frame_candidates.sort(key=lambda x: x[0])
+    
+    if len(frame_candidates) > target_frames:
+        step = len(frame_candidates) / target_frames
+        indices = [int(i * step) for i in range(target_frames)]
+        selected_frames = [frame_candidates[i] for i in indices]
+    else:
+        selected_frames = frame_candidates
+
+    if not selected_frames:
+        raise ValueError("No keyframes were selected")
+    
+    frame_height, frame_width = selected_frames[0][1].shape[:2]
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    
+    # Calculate required repeats for target duration
+    total_frames_needed = int(target_duration * fps)
+    frames_count = len(selected_frames)
+    base_repeats = total_frames_needed // frames_count
+    remainder = total_frames_needed % frames_count
+    frame_repeats = [base_repeats + 1 if i < remainder else base_repeats 
+                    for i in range(frames_count)]
+    
+    output_fps = sum(frame_repeats) / target_duration
+    out = cv2.VideoWriter(str(output_video_path), fourcc, output_fps, (frame_width, frame_height))
+    
+    for (frame_num, frame, score, timestamp), repeats in zip(selected_frames, frame_repeats):
+        for _ in range(repeats):
+            out.write(frame)
+    
+    out.release()
+    logger.info(f"Created {target_duration}s abstract video: {output_video_path.name}")
+
+def process_directory(input_dir: str):
+    """Process all MP4 files in directory with target duration 1.5s and 60fpm."""
+    input_path = Path(input_dir)
+    output_dir = input_path.parent / f"{input_path.name}_1_5_seconds"
+    output_dir.mkdir(exist_ok=True)
+    
+    mp4_files = list(input_path.glob("*.mp4"))
+    if not mp4_files:
+        logger.warning(f"No MP4 files found in {input_path}")
+        return
+    
+    logger.info(f"Processing {len(mp4_files)} MP4 files to {output_dir}")
+    
+    for input_file in mp4_files:
+        output_file = output_dir / input_file.name
+        try:
+            create_abstract_video(
+                input_file,
+                output_file,
+                frames_per_minute=60,
+                target_duration=1.5
+            )
+        except Exception as e:
+            logger.error(f"Failed to process {input_file.name}: {str(e)}")
+    
+    logger.info(f"Completed processing {len(mp4_files)} files")
+
+if __name__ == "__main__":
+    input_directory = r"C:\Users\DELL\Downloads\Genshin_StarRail_Longshu_Sketch_Tail_Videos_Reversed"
+    process_directory(input_directory)
+```
+
 #### use this to get depth image
 #### https://huggingface.co/spaces/depth-anything/Depth-Anything-V2
 #### https://huggingface.co/spaces/svjack/Depth-Anything-V2
